@@ -135,9 +135,13 @@ def select_shallow_thinking_agent(provider) -> str:
         ],
         "anthropic": [
             ("Claude Haiku 3.5 - Fast inference and standard capabilities", "claude-3-5-haiku-latest"),
+            ("Claude Haiku 4.5 - Latest fast model with improved capabilities", "claude-haiku-4-5-20251001"),
             ("Claude Sonnet 3.5 - Highly capable standard model", "claude-3-5-sonnet-latest"),
             ("Claude Sonnet 3.7 - Exceptional hybrid reasoning and agentic capabilities", "claude-3-7-sonnet-latest"),
-            ("Claude Sonnet 4 - High performance and excellent reasoning", "claude-sonnet-4-0"),
+            ("Claude Sonnet 4 - High performance and excellent reasoning", "claude-sonnet-4-20250514"),
+            ("Claude Sonnet 4.5 - Latest Sonnet with enhanced capabilities", "claude-sonnet-4-5-20250929"),
+            ("Claude Opus 4 - Most powerful Anthropic model", "claude-opus-4-1-20250805"),
+            ("Claude Opus 4.5 - Latest and most capable Anthropic model", "claude-opus-4-5-20251101"),
         ],
         "google": [
             ("Gemini 2.0 Flash-Lite - Cost efficiency and low latency", "gemini-2.0-flash-lite"),
@@ -196,10 +200,13 @@ def select_deep_thinking_agent(provider) -> str:
         ],
         "anthropic": [
             ("Claude Haiku 3.5 - Fast inference and standard capabilities", "claude-3-5-haiku-latest"),
+            ("Claude Haiku 4.5 - Latest fast model with improved capabilities", "claude-haiku-4-5-20251001"),
             ("Claude Sonnet 3.5 - Highly capable standard model", "claude-3-5-sonnet-latest"),
             ("Claude Sonnet 3.7 - Exceptional hybrid reasoning and agentic capabilities", "claude-3-7-sonnet-latest"),
-            ("Claude Sonnet 4 - High performance and excellent reasoning", "claude-sonnet-4-0"),
-            ("Claude Opus 4 - Most powerful Anthropic model", "	claude-opus-4-0"),
+            ("Claude Sonnet 4 - High performance and excellent reasoning", "claude-sonnet-4-20250514"),
+            ("Claude Sonnet 4.5 - Latest Sonnet with enhanced capabilities", "claude-sonnet-4-5-20250929"),
+            ("Claude Opus 4 - Most powerful Anthropic model", "claude-opus-4-1-20250805"),
+            ("Claude Opus 4.5 - Latest and most capable Anthropic model", "claude-opus-4-5-20251101"),
         ],
         "google": [
             ("Gemini 2.0 Flash-Lite - Cost efficiency and low latency", "gemini-2.0-flash-lite"),

@@ -13,7 +13,8 @@ from .alpha_vantage import (
     get_cashflow as get_alpha_vantage_cashflow,
     get_income_statement as get_alpha_vantage_income_statement,
     get_insider_transactions as get_alpha_vantage_insider_transactions,
-    get_news as get_alpha_vantage_news
+    get_news as get_alpha_vantage_news,
+    get_global_news as get_alpha_vantage_global_news
 )
 from .alpha_vantage_common import AlphaVantageRateLimitError
 
@@ -104,6 +105,7 @@ VENDOR_METHODS = {
     },
     "get_global_news": {
         "openai": get_global_news_openai,
+        "alpha_vantage": get_alpha_vantage_global_news,
         "local": get_reddit_global_news
     },
     "get_insider_sentiment": {

@@ -13,6 +13,11 @@ DEFAULT_CONFIG = {
     "deep_think_llm": "o4-mini",
     "quick_think_llm": "gpt-4o-mini",
     "backend_url": "https://api.openai.com/v1",
+    # Anthropic-specific settings (used when llm_provider is "anthropic")
+    # Base URL can also be set via ANTHROPIC_BASE_URL env var
+    "anthropic_base_url": os.getenv("ANTHROPIC_BASE_URL", "https://api.anthropic.com"),
+    # Max tokens for Anthropic responses (default 8192 to avoid context overflow)
+    "anthropic_max_tokens": 8192,
     # Debate and discussion settings
     "max_debate_rounds": 1,
     "max_risk_discuss_rounds": 1,
