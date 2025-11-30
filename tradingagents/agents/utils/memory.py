@@ -1,25 +1,81 @@
 import chromadb
 from chromadb.config import Settings
-from openai import OpenAI
+from chromadb.utils import embedding_functions
+import os
 
 
 class FinancialSituationMemory:
     def __init__(self, name, config):
-        if config["backend_url"] == "http://localhost:11434/v1":
-            self.embedding = "nomic-embed-text"
-        else:
+        # Determine embedding provider based on config
+        self.embedding_provider = config.get("embedding_provider", "auto")
+        self.config = config
+
+        # Auto-detect best available embedding provider
+        if self.embedding_provider == "auto":
+            llm_provider = config.get("llm_provider", "openai").lower()
+            if llm_provider == "anthropic":
+                # Anthropic doesn't have embeddings, use chromadb's default embedding function
+                self.embedding_provider = "default"
+            elif config.get("backend_url") == "http://localhost:11434/v1":
+                self.embedding_provider = "ollama"
+            else:
+                self.embedding_provider = "openai"
+
+        # Initialize embedding function based on provider
+        if self.embedding_provider == "openai":
+            from openai import OpenAI
             self.embedding = "text-embedding-3-small"
-        self.client = OpenAI(base_url=config["backend_url"])
+            self.client = OpenAI(base_url=config.get("backend_url"))
+            self.embedding_function = None  # Use manual embedding
+        elif self.embedding_provider == "ollama":
+            from openai import OpenAI
+            self.embedding = "nomic-embed-text"
+            self.client = OpenAI(base_url=config.get("backend_url"))
+            self.embedding_function = None  # Use manual embedding
+        elif self.embedding_provider == "default":
+            # Use chromadb's default embedding function (doesn't require external API)
+            self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
+            self.embedding = "chromadb-default"
+        elif self.embedding_provider == "voyageai":
+            # Voyage AI (recommended by Anthropic for use with Claude)
+            try:
+                import voyageai
+                self.client = voyageai.Client(api_key=os.getenv("VOYAGE_API_KEY"))
+                self.embedding = "voyage-3.5"
+                self.embedding_function = None
+            except ImportError:
+                raise ImportError(
+                    "voyageai is required for Voyage embeddings. "
+                    "Install with: pip install voyageai"
+                )
+        else:
+            raise ValueError(f"Unsupported embedding provider: {self.embedding_provider}")
+
         self.chroma_client = chromadb.Client(Settings(allow_reset=True))
-        self.situation_collection = self.chroma_client.create_collection(name=name)
+
+        # Create collection with embedding function if available
+        if self.embedding_function:
+            self.situation_collection = self.chroma_client.create_collection(
+                name=name,
+                embedding_function=self.embedding_function
+            )
+        else:
+            self.situation_collection = self.chroma_client.create_collection(name=name)
 
     def get_embedding(self, text):
-        """Get OpenAI embedding for a text"""
-        
-        response = self.client.embeddings.create(
-            model=self.embedding, input=text
-        )
-        return response.data[0].embedding
+        """Get embedding for a text using the configured provider"""
+
+        if self.embedding_provider in ["openai", "ollama"]:
+            response = self.client.embeddings.create(
+                model=self.embedding, input=text
+            )
+            return response.data[0].embedding
+        elif self.embedding_provider == "default":
+            # Use chromadb's default embedding function
+            return self.embedding_function([text])[0]
+        elif self.embedding_provider == "voyageai":
+            result = self.client.embed([text], model=self.embedding, input_type="document")
+            return result.embeddings[0]
 
     def add_situations(self, situations_and_advice):
         """Add financial situations and their corresponding advice. Parameter is a list of tuples (situation, rec)"""

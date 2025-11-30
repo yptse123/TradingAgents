@@ -10,6 +10,14 @@ from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+
+def _get_anthropic_api_key() -> str:
+    """Get Anthropic API key from environment variables.
+
+    Checks for ANTHROPIC_AUTH_TOKEN first, then falls back to ANTHROPIC_API_KEY.
+    """
+    return os.environ.get("ANTHROPIC_AUTH_TOKEN") or os.environ.get("ANTHROPIC_API_KEY", "")
+
 from langgraph.prebuilt import ToolNode
 
 from tradingagents.agents import *
@@ -76,8 +84,25 @@ class TradingAgentsGraph:
             self.deep_thinking_llm = ChatOpenAI(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
             self.quick_thinking_llm = ChatOpenAI(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
         elif self.config["llm_provider"].lower() == "anthropic":
-            self.deep_thinking_llm = ChatAnthropic(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
-            self.quick_thinking_llm = ChatAnthropic(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
+            # Get API key from ANTHROPIC_AUTH_TOKEN or ANTHROPIC_API_KEY
+            anthropic_api_key = _get_anthropic_api_key()
+            # Get base URL from anthropic_base_url config (prioritize over backend_url for Anthropic)
+            anthropic_base_url = self.config.get("anthropic_base_url")
+            # Use configurable max_tokens to avoid context overflow (default 8192)
+            anthropic_max_tokens = self.config.get("anthropic_max_tokens", 8192)
+
+            self.deep_thinking_llm = ChatAnthropic(
+                model=self.config["deep_think_llm"],
+                api_key=anthropic_api_key if anthropic_api_key else None,
+                base_url=anthropic_base_url if anthropic_base_url else None,
+                max_tokens=anthropic_max_tokens,
+            )
+            self.quick_thinking_llm = ChatAnthropic(
+                model=self.config["quick_think_llm"],
+                api_key=anthropic_api_key if anthropic_api_key else None,
+                base_url=anthropic_base_url if anthropic_base_url else None,
+                max_tokens=anthropic_max_tokens,
+            )
         elif self.config["llm_provider"].lower() == "google":
             self.deep_thinking_llm = ChatGoogleGenerativeAI(model=self.config["deep_think_llm"])
             self.quick_thinking_llm = ChatGoogleGenerativeAI(model=self.config["quick_think_llm"])

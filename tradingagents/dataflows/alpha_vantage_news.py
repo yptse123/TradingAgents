@@ -24,6 +24,39 @@ def get_news(ticker, start_date, end_date) -> dict[str, str] | str:
     
     return _make_api_request("NEWS_SENTIMENT", params)
 
+def get_global_news(curr_date, look_back_days=7, limit=10) -> dict[str, str] | str:
+    """Returns global market news & sentiment data from premier news outlets worldwide.
+
+    Covers general market topics like fiscal policy, mergers & acquisitions, IPOs, economy.
+
+    Args:
+        curr_date: Current date for news search.
+        look_back_days: Number of days to look back.
+        limit: Maximum number of news items.
+
+    Returns:
+        Dictionary containing news sentiment data or JSON string.
+    """
+    from datetime import datetime, timedelta
+
+    # Parse curr_date and calculate start_date
+    if isinstance(curr_date, str):
+        end_date = datetime.strptime(curr_date, "%Y-%m-%d")
+    else:
+        end_date = curr_date
+    start_date = end_date - timedelta(days=look_back_days)
+
+    params = {
+        "topics": "economy_fiscal,economy_monetary,economy_macro,finance,mergers_and_acquisitions,ipo",
+        "time_from": format_datetime_for_api(start_date.strftime("%Y-%m-%d")),
+        "time_to": format_datetime_for_api(end_date.strftime("%Y-%m-%d")),
+        "sort": "LATEST",
+        "limit": str(limit),
+    }
+
+    return _make_api_request("NEWS_SENTIMENT", params)
+
+
 def get_insider_transactions(symbol: str) -> dict[str, str] | str:
     """Returns latest and historical insider transactions by key stakeholders.
 

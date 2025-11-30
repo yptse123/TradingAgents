@@ -8,9 +8,10 @@ load_dotenv()
 
 # Create a custom config
 config = DEFAULT_CONFIG.copy()
-config["deep_think_llm"] = "gpt-4o-mini"  # Use a different model
-config["quick_think_llm"] = "gpt-4o-mini"  # Use a different model
-config["max_debate_rounds"] = 1  # Increase debate rounds
+config["llm_provider"] = "anthropic"  # Use Anthropic Claude
+config["deep_think_llm"] = "claude-opus-4-5-20251101"  # Deep thinking model (Opus 4.5)
+config["quick_think_llm"] = "claude-haiku-4-5-20251001"  # Quick thinking model (Haiku 4.5)
+config["max_debate_rounds"] = 1  # Debate rounds
 
 # Configure data vendors (default uses yfinance and alpha_vantage)
 config["data_vendors"] = {
@@ -20,8 +21,12 @@ config["data_vendors"] = {
     "news_data": "alpha_vantage",            # Options: openai, alpha_vantage, google, local
 }
 
-# Initialize with custom config
-ta = TradingAgentsGraph(debug=True, config=config)
+# Initialize with custom config (all analysts enabled)
+ta = TradingAgentsGraph(
+    selected_analysts=["market", "social", "news", "fundamentals"],
+    debug=True,
+    config=config
+)
 
 # forward propagate
 _, decision = ta.propagate("NVDA", "2024-05-10")
